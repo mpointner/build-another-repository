@@ -25,7 +25,7 @@ jobs:
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_BUILD_ANOTHER_REPO }}
 
       - name: Create pre-release
         uses: softprops/action-gh-release@v2
@@ -35,4 +35,4 @@ jobs:
           files: |
             rel/**
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_BUILD_ANOTHER_REPO }}
