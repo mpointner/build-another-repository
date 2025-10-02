@@ -1,9 +1,8 @@
 name: Build and Attach Artifact from Another Repository
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call: {}
+  workflow_dispatch: {}
 
 jobs:
   checkout-build-attach:
