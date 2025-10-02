@@ -1,0 +1,48 @@
+name: Build and Attach Artifact from Another Repository
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  checkout-build-attach:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the main repository code
+      #- name: Checkout Current Repository
+      #  uses: actions/checkout@v3
+
+      # Step 2: Checkout another repository (Target Repository)
+      - name: Checkout Another Repository
+        uses: actions/checkout@v3
+        with:
+          repository: mpointner/user-administration
+          token: ${{ secrets.GITHUB_TOKEN }}
+          #path: target-repo # Check out the code in a directory called 'target-repo'
+            
+      # Step 3: Set up Java environment
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17' # Use the appropriate JDK version for your project
+
+      # Step 4: Build the Project with Gradle
+      - name: Build with Gradle
+        #working-directory: target-repo # Point to 'target-repo' directory
+        run: ./gradlew build
+
+      # Step 5: Attach the Artifact
+      - name: Attach Build Artifact
+        #working-directory: target-repo # Point to 'target-repo' directory
+        run: |
+          mkdir -p ../artifacts
+          cp build/libs/*.jar ../artifacts/
+          
+      - name: Upload Artifacts to the Workflow Run
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-artifacts
+          path: artifacts
