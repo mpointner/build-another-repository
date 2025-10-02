@@ -38,10 +38,9 @@ jobs:
         #working-directory: target-repo # Point to 'target-repo' directory
         run: |
           mkdir -p ../artifacts
-          cp build/libs/*.jar ../artifacts/
-          
+
       - name: Upload Artifacts to the Workflow Run
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: built-artifacts
-          path: artifacts
+          path: build/libs/*.jar
+          retention-days: 5
