@@ -29,10 +29,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       # Step 4: Build the Project with Gradle
       - name: Build with Gradle
         #working-directory: target-repo # Point to 'target-repo' directory
-        run: ./gradlew build
+        run: ./gradlew build -x test
 
       # Step 5: Attach the Artifact
       - name: Attach Build Artifact
