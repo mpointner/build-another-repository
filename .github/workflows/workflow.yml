@@ -20,7 +20,7 @@ jobs:
         with:
           repository: mpointner/user-administration
           ref: main # Replace with the target branch name
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_USER_ADMINISTRATION }}
           #path: target-repo # Check out the code in a directory called 'target-repo'
 
       - name: Setup JDK
