@@ -30,10 +30,44 @@ jobs:
           path: rel
           merge-multiple: true
 
+      - name: Determine new patch version
+        id: increment_tag
+        run: |
+          # Fetch all tags to ensure the latest are available
+          git fetch --tags
+          
+          # Get the most recent tag
+          LAST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          
+          # Parse the tag into prefix and patch version
+          if [[ -z "$LAST_TAG" ]]; then
+            echo "No tags found. Initializing new tag."
+            NEW_TAG="prefix-1.0.0" # Default prefix and version
+          else
+            # Extract everything before the last dot (prefix) and after it (patch version)
+            PREFIX="${LAST_TAG%.*}"  # Everything before the last dot
+            PATCH="${LAST_TAG##*.}" # Everything after the last dot
+          
+            # Increment the patch version
+            if [[ $PATCH =~ ^[0-9]+$ ]]; then
+              NEW_PATCH=$((PATCH + 1))
+            else
+              echo "Error: Could not parse numeric patch version from '$PATCH'."
+            exit 1
+          fi
+        
+          # Combine back the prefix and incremented patch version
+          NEW_TAG="${PREFIX}.${NEW_PATCH}"
+          fi
+          
+          # Output the new tag
+          echo "::set-output name=new_tag::$NEW_TAG"
+          echo "::set-output name=last_tag::$LAST_TAG"
+
       - name: Tag Release
         run: |
-          git tag "${GITHUB_REF_NAME}"
-          git push origin "${GITHUB_REF_NAME}"
+          git tag ${{ steps.increment_tag.outputs.new_tag }}
+          git push origin ${{ steps.increment_tag.outputs.new_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_USER_ADMINISTRATION }}
 
@@ -47,6 +81,9 @@ jobs:
       - name: Generate changelog
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v5
+        with:
+          ignorePreReleases: "false"
+          fromTag: ${{ steps.increment_tag.outputs.last_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
