@@ -1,8 +1,8 @@
 name: prerelease
 
 on:
-  release:
-    types: [prereleased]
+  workflow_call: {}
+  workflow_dispatch: {}
 
 permissions:
   contents: write
