@@ -4,6 +4,9 @@ on:
   release:
     types: [prereleased]
 
+permissions:
+  contents: write  # Grants permission to upload files to releases
+
 jobs:
   user-administration:
     uses: ./.github/workflows/workflow.yml
