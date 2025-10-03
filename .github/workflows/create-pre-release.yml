@@ -1,9 +1,8 @@
 name: prerelease
 
 on:
-  push:
-    tags:
-      - "pre-*.*.*"                   # läuft nur bei Tag push, z.B. pre-1.0.0
+  release:
+    types: [prereleased]
 
 jobs:
   user-administration:
@@ -25,7 +24,7 @@ jobs:
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_BUILD_ANOTHER_REPO }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create pre-release
         uses: softprops/action-gh-release@v2
@@ -35,4 +34,4 @@ jobs:
           files: |
             rel/**
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_BUILD_ANOTHER_REPO }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
