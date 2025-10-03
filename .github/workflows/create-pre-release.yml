@@ -42,7 +42,7 @@ jobs:
           # Parse the tag into prefix and patch version
           if [[ -z "$LAST_TAG" ]]; then
             echo "No tags found. Initializing new tag."
-            NEW_TAG="prefix-1.0.0" # Default prefix and version
+            NEW_TAG="pre-1.0.0" # Default prefix and version
           else
             # Extract everything before the last dot (prefix) and after it (patch version)
             PREFIX="${LAST_TAG%.*}"  # Everything before the last dot
