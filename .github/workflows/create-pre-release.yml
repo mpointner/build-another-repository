@@ -11,6 +11,8 @@ jobs:
   user-administration:
     uses: ./.github/workflows/workflow.yml
     secrets: inherit
+    with:
+      prerelease: true
 
 
   release:

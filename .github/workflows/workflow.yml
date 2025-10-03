@@ -1,8 +1,10 @@
 name: Build and Attach Artifact from Another Repository
 
 on:
-  workflow_call: {}
-  workflow_dispatch: {}
+  workflow_call:
+    inputs:
+      prerelease:
+        type: boolean
 
 jobs:
   checkout-build-attach:
@@ -10,11 +12,13 @@ jobs:
 
     steps:
       # Step 1: Checkout the main repository code
-      #- name: Checkout Current Repository
-      #  uses: actions/checkout@v3
+      - name: Checkout This Repository
+        if: ${{ inputs.prerelease == false }}
+        uses: actions/checkout@v3
 
       # Step 2: Checkout another repository (Target Repository)
       - name: Checkout Another Repository
+        if: ${{ inputs.prerelease == true }}
         uses: actions/checkout@v3
         with:
           repository: mpointner/user-administration
