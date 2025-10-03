@@ -5,7 +5,7 @@ on:
     types: [prereleased]
 
 permissions:
-  contents: write  # Grants permission to upload files to releases
+  contents: write
 
 jobs:
   user-administration:
@@ -17,31 +17,45 @@ jobs:
     needs: [user-administration]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Another Repository
+        uses: actions/checkout@v3
+        with:
+          repository: mpointner/user-administration
+          ref: main
+          token: ${{ secrets.PAT_USER_ADMINISTRATION }}
+          
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: rel
           merge-multiple: true
 
-      - name: Attach artefacts to release
-        uses: AButler/upload-release-assets@v3.0
-        with:
-          files: |
-            rel/**
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tag Release
+        run: |
+          git tag "${GITHUB_REF_NAME}"
+          git push origin "${GITHUB_REF_NAME}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_USER_ADMINISTRATION }}
 
-#      - name: Generate changelog
-#        id: changelog
-#        uses: mikepenz/release-changelog-builder-action@v5
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#      - name: Create pre-release
-#        uses: softprops/action-gh-release@v2
+#      - name: Attach artefacts to release
+#        uses: AButler/upload-release-assets@v3.0
 #        with:
-#          prerelease: true
-#          body: ${{ steps.changelog.outputs.changelog }}
 #          files: |
 #            rel/**
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            rel/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
