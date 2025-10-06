@@ -1,8 +1,8 @@
-name: prerelease
+name: Prerelease
 
 on:
-  workflow_call: {}
-  workflow_dispatch: {}
+  workflow_call: { }
+  workflow_dispatch: { }
 
 permissions:
   contents: write
@@ -16,7 +16,7 @@ jobs:
 
 
   release:
-    needs: [user-administration]
+    needs: [ user-administration ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Another Repository
@@ -25,7 +25,7 @@ jobs:
           repository: mpointner/user-administration
           ref: main
           token: ${{ secrets.PAT_USER_ADMINISTRATION }}
-          
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -38,33 +38,37 @@ jobs:
           # Fetch all tags to ensure the latest are available
           git fetch --tags
           
-          # Get the most recent tag
-          LAST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          # Get the most recent release tag
+          LAST_RELEASE_TAG=$(git tag --sort=-v:refname | grep "^v" | head -n 1)
           
-          # Parse the tag into prefix and patch version
-          if [[ -z "$LAST_TAG" ]]; then
+          # Parse the release tag into major, minor and patch
+          if [[ -z "$LAST_RELEASE_TAG" ]]; then
             echo "No tags found. Initializing new tag."
-            NEW_TAG="pre-1.0.0" # Default prefix and version
+            NEW_TAG="pre1.0.0" # Default prefix and version
           else
-            # Extract everything before the last dot (prefix) and after it (patch version)
-            PREFIX="${LAST_TAG%.*}"  # Everything before the last dot
-            PATCH="${LAST_TAG##*.}" # Everything after the last dot
+            LAST_RELEASE_VERSION=${LAST_RELEASE_TAG#v}
+            MAJOR=$(echo $LAST_RELEASE_VERSION | cut -d. -f1)
+            MINOR=$(echo $LAST_RELEASE_VERSION | cut -d. -f2)
+            NEW_MINOR=$((MINOR + 1))
           
-            # Increment the patch version
-            if [[ $PATCH =~ ^[0-9]+$ ]]; then
-              NEW_PATCH=$((PATCH + 1))
+            # Get the most recent prerelease tag
+            LAST_PRERELEASE_TAG=$(git tag --sort=-v:refname | grep "^pre" | head -n 1)
+          
+            # 
+            if [[ -z "$LAST_PRERELEASE_TAG" ]]; then
+              NEW_PATCH=0
             else
-              echo "Error: Could not parse numeric patch version from '$PATCH'."
-            exit 1
-          fi
-        
-          # Combine back the prefix and incremented patch version
-          NEW_TAG="${PREFIX}.${NEW_PATCH}"
+              LAST_PRERELEASE_VERSION=${LAST_PRERELEASE_TAG#pre}
+              PATCH=$(echo $LAST_RELEASE_VERSION | cut -d. -f3) # Extract patch version
+              NEW_PATCH=$((PATCH + 1))
+            fi
+          
+            NEW_TAG="pre${MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
           fi
           
           # Output the new tag
           echo "::set-output name=new_tag::$NEW_TAG"
-          echo "::set-output name=last_tag::$LAST_TAG"
+          echo "::set-output name=LAST_RELEASE_TAG::$LAST_RELEASE_TAG"
 
       - name: Tag Release
         run: |
@@ -73,19 +77,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_USER_ADMINISTRATION }}
 
-#      - name: Attach artefacts to release
-#        uses: AButler/upload-release-assets@v3.0
-#        with:
-#          files: |
-#            rel/**
-#          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Generate changelog
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v5
         with:
-          ignorePreReleases: "false"
-          fromTag: ${{ steps.increment_tag.outputs.last_tag }}
+          fromTag: ${{ steps.increment_tag.outputs.LAST_RELEASE_TAG }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
