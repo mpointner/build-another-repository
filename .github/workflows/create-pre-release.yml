@@ -92,7 +92,11 @@ jobs:
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v5
         with:
+          owner: "mpointner"
+          repo: "user-administration"
           fromTag: ${{ steps.increment_tag.outputs.last_release_tag }}
+          toTag: ${{ steps.increment_tag.outputs.new_prerelease_tag }}
+          token: ${{ secrets.PAT_USER_ADMINISTRATION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
