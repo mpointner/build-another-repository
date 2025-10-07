@@ -97,6 +97,7 @@ jobs:
           fromTag: ${{ steps.increment_tag.outputs.last_release_tag }}
           toTag: ${{ steps.increment_tag.outputs.new_prerelease_tag }}
           token: ${{ secrets.PAT_USER_ADMINISTRATION }}
+          ignorePreReleases: "false"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
