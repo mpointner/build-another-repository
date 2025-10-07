@@ -58,15 +58,25 @@ jobs:
           fi
 
           # Patch erhöhen, wenn es bereits einen Prelease gibt, sonst 0
+          # if [[ -z "$LAST_PRERELEASE_TAG" ]]; then
+          #   NEW_PATCH=0
+          # else
+          #   LAST_PRERELEASE_VERSION=${LAST_PRERELEASE_TAG#pre}
+          #   PATCH=$(echo $LAST_PRERELEASE_VERSION | cut -d. -f3) # Extract patch version
+          #   NEW_PATCH=$((PATCH + 1))
+          # fi
+          PATCH=$(echo $LAST_PRERELEASE_VERSION | cut -d. -f3) # Extract patch version
+
+          # Build erhöhen, wenn es bereits einen Prelease gibt, sonst 0
           if [[ -z "$LAST_PRERELEASE_TAG" ]]; then
-            NEW_PATCH=0
+            NEW_BUILD=0
           else
             LAST_PRERELEASE_VERSION=${LAST_PRERELEASE_TAG#pre}
-            PATCH=$(echo $LAST_PRERELEASE_VERSION | cut -d. -f3) # Extract patch version
-            NEW_PATCH=$((PATCH + 1))
+            BUILD=$(echo $LAST_PRERELEASE_VERSION | cut -d. -f4) # Extract build version
+            NEW_BUILD=$((PATCH + 1))
           fi
 
-          NEW_TAG="pre${MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+          NEW_TAG="pre${MAJOR}.${NEW_MINOR}.${PATCH}.${NEW_BUILD}"
 
           echo "::set-output name=new_prerelease_tag::$NEW_TAG"
           echo "::set-output name=last_release_tag::$LAST_RELEASE_TAG"
